@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
 // ✅ Instance method
 userSchema.methods.generateAuthToken = function () {
   return jwt.sign({ _id: this._id }, process.env.AUTH_TOKEN_SECRET, {
-    expiresIn: "7d",
+    expiresIn: "24h",
   });
 };
 
@@ -34,6 +34,13 @@ userSchema.methods.generateAuthToken = function () {
 userSchema.statics.hashPassword = async function (password) {
   const saltRounds = 10;
   return await bcrypt.hash(password, saltRounds);
+};
+
+userSchema.methods.comparePassword = async function (password) {
+  if (!password || !this.password) {
+    throw new Error("Missing password or hash");
+  }
+  return await bcrypt.compare(password, this.password);
 };
 
 const User = mongoose.model("User", userSchema);

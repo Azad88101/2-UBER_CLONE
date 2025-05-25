@@ -3,7 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectToDB = require("./config/db");
 const userRoute = require("./routes/user.routes");
-
+const cookieParser = require("cookie-parser");
 
 connectToDB();
 const app = e();
@@ -12,6 +12,7 @@ app.use(cors());
 app.use(e.urlencoded({ extended: true }));
 app.use(e.json());
 
+app.use(cookieParser())
 app.use("/user", userRoute);
 
 module.exports = app;
