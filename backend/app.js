@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectToDB = require("./config/db");
 const userRoute = require("./routes/user.routes");
+const captianRoute = require("./routes/captain.route");
 const cookieParser = require("cookie-parser");
 
 connectToDB();
@@ -14,5 +15,6 @@ app.use(e.json());
 
 app.use(cookieParser())
 app.use("/user", userRoute);
+app.use("/captain", captianRoute);
 
 module.exports = app;
