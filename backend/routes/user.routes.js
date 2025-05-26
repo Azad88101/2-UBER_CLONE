@@ -8,7 +8,7 @@ const {
 const router = e.Router();
 
 const { body } = require("express-validator");
-const auth = require("../middleware/Auth.middleware");
+const { userAuth } = require("../middleware/Auth.middleware");
 
 router.post(
   "/register",
@@ -37,7 +37,7 @@ router.post(
   login
 );
 
-router.get("/profile", auth, getUserProfile);
+router.get("/profile", userAuth, getUserProfile);
 router.get("/logout", logout);
 
 module.exports = router;
