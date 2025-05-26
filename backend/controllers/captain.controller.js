@@ -1,10 +1,11 @@
 const { validationResult } = require("express-validator");
 const Captain = require("../models/captain.model");
 const ApiError = require("../utils/ApiError");
+const Blacklist = require("../models/blacklist.model");
 
 const register = async (req, res) => {
   const err = validationResult(req);
-  if (!err.isEmpty) {
+  if (!err.isEmpty()) {
     throw new ApiError(400, err);
   }
 
@@ -45,48 +46,61 @@ const register = async (req, res) => {
     message: "captain create succesfully",
     data: { token, captain },
   });
-  
 };
 
+const login = async (req, res) => {
+  const err = validationResult(req);
+  if (!err.isEmpty) {
+    throw new ApiError(400, err);
+  }
 
+  const { email, password } = req.body;
 
+  if (!email || !password) {
+    throw new ApiError(409, "something is missing");
+  }
 
+  const captain = await Captain.findOne({ email }).select("+password");
 
+  if (!captain) {
+    throw new ApiError(409, "user nor found");
+  }
 
-const login =async (req,res)=>{
+  const isMatch = await captain.comparePassword(password);
 
-}
+  if (!isMatch) {
+    throw new ApiError(409, "email or password is wrong");
+  }
 
+  const token = await captain.generateToken();
+  console.log(token);
 
+  res.cookie("token", token);
+  return res.status(200).json({
+    message: "user Logged In succesfully",
+    data: {
+      token,
+      captain,
+    },
+  });
+};
 
+const getCaptainProfile = (req, res) => {
+  return res.status(200).json({
+    data: req.captain,
+  });
+};
 
+const logout = async (req, res) => {
+  res.clearCookie("token");
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
+  const blacklist = await Blacklist.create({
+    token,
+  });
+  
 
+  return res.status(200).json({ message: "Logged out succesfully" });
+};
 
-
-
-
-
-
-
-module.exports = { register };
-
-// vehicle: {
-//     color: {
-//       type: String,
-//       required: true,
-//     },
-//     plate: {
-//       type: string,
-//       required: true,
-//     },
-
-//     capacity: {
-//       type: Number,
-//       required: true,
-//     },
-//     vehicleType: {
-//       type: String,
-//       enum: ["bike", "auto", "car"],
-//     },
-//   },
+module.exports = { register, login, getCaptainProfile, logout };
