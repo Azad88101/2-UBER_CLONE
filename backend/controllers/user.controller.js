@@ -19,6 +19,11 @@ const register = async (req, res) => {
   if (!fullname.firstname || !email || !password)
     throw new ApiError(409, "something is missing ");
 
+  const isAlreadyExist = User.findOne({ email });
+  if (isAlreadyExist) {
+    throw new ApiError(409, "user already present with this email");
+  }
+
   // console.log(password)
   const hashPassword = await User.hashPassword(password);
   // console.log(hashPassword)
@@ -29,8 +34,9 @@ const register = async (req, res) => {
       lastname: fullname.lastname,
     },
     email,
-    password: hashPassword,
-  });
+    password:hashPassword,
+
+  })
 
   console.log(user);
 
