@@ -380,6 +380,115 @@ curl -X POST http://localhost:3000/captain/register \
 
 This README section provides a comprehensive overview of the `captain/register` endpoint, including all necessary details for developers to understand how to use it effectively.
 
+
+
+# Captain Login API
+
+## Endpoint
+
+`POST /captain/login`
+
+## Description
+
+This endpoint authenticates a captain and returns a JSON Web Token (JWT) along with the captain's details if the credentials are valid. The login process validates:
+
+- A valid email format
+- Password must be at least 6 characters long
+
+## Request Body
+
+Send a JSON object with the following structure:
+
+```json
+{
+  "email": "string (valid email, required)",
+  "password": "string (min 6 chars, required)"
+}
+```
+
+### Example Request
+
+```json
+{
+  "email": "jane.doe@example.com",
+  "password": "secret123"
+}
+```
+
+## Responses
+
+- **200 OK**  
+  Login was successful. The response includes the JWT token and captain details.
+
+  ```json
+  {
+    "message": "user Logged In succesfully",
+    "data": {
+      "token": "JWT token string here",
+      "captain": {
+        "_id": "captain id",
+        "fullname": {
+          "firstname": "Jane",
+          "lastname": "Doe"
+        },
+        "email": "jane.doe@example.com",
+        "vehicle": {
+          "color": "red",
+          "plate": "ABC123",
+          "capacity": 2,
+          "vehicleType": "car"
+        }
+      }
+    }
+  }
+  ```
+
+- **400 Bad Request**  
+  Validation error; email or password format is invalid.
+
+  ```json
+  {
+    "message": "error from froontend",
+    "error": [
+      {
+        "msg": "Invalid email",
+        "param": "email",
+        "location": "body"
+      }
+    ]
+  }
+  ```
+
+- **409 Conflict**  
+  Invalid credentials or missing fields.
+
+  ```json
+  {
+    "statusCode": 409,
+    "message": "email or password is wrong"
+  }
+  ```
+
+## Notes
+
+- The endpoint is validated using [`express-validator`](https://express-validator.github.io/docs/).
+- Passwords are compared using bcrypt's compare function.
+- The JWT token is generated using the captain's ID and stored in both the response and cookies.
+- The token can be used for subsequent authenticated requests.
+- The endpoint checks for blacklisted tokens to prevent unauthorized access.
+
+## Example cURL Request
+
+```bash
+curl -X POST http://localhost:3000/captain/login \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "jane.doe@example.com",
+  "password": "secret123"
+}'
+```
+
+
 # Captain Profile & Logout Endpoints Documentation
 
 ## 1. Get Captain Profile
@@ -481,3 +590,4 @@ Cookie: token=your_jwt_token_here
   1. Cleared from the cookies
   2. Added to the blacklist collection to prevent reuse
 - The blacklist mechanism ensures that logged-out tokens cannot be used for authentication
+
