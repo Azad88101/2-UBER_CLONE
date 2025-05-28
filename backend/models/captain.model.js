@@ -50,7 +50,7 @@ const captionSchema = new mongoose.Schema({
     },
     vehicleType: {
       type: String,
-      enum: ["bike", "auto", "car"],
+      enum: ["Bike", "Auto", "Car"],
       required: true,
     },
   },
