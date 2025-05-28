@@ -1,15 +1,8 @@
-// utils/ApiError.js
-
 class ApiError extends Error {
-  constructor(statusCode, message, stack = '') {
+  constructor(statusCode, message, errors = []) {
     super(message);
     this.statusCode = statusCode;
-
-    if (stack) {
-      this.stack = stack;
-    } else {
-      Error.captureStackTrace(this, this.constructor);
-    }
+    this.errors = errors;
   }
 }
 
