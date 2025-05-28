@@ -378,5 +378,106 @@ curl -X POST http://localhost:3000/captain/register \
 }'
 ```
 
-
 This README section provides a comprehensive overview of the `captain/register` endpoint, including all necessary details for developers to understand how to use it effectively.
+
+# Captain Profile & Logout Endpoints Documentation
+
+## 1. Get Captain Profile
+
+**Endpoint:** `GET /captain/profile`
+
+**Description:**  
+Retrieves the profile details of the currently logged-in captain. This endpoint is protected and requires a valid JWT (provided via cookies or the `Authorization` header).
+
+**Authentication:**
+
+- The captain must be authenticated
+- Middleware verifies the JWT and attaches the captain object to `req.captain`
+
+**Example Request:**
+
+```
+GET /captain/profile
+Cookie: token=your_jwt_token_here
+```
+
+**Responses:**
+
+- **200 OK**  
+  Returns the logged-in captain's data.
+
+  ```json
+  {
+    "data": {
+      "_id": "captain id",
+      "fullname": {
+        "firstname": "Jane",
+        "lastname": "Doe"
+      },
+      "email": "jane.doe@example.com",
+      "vehicle": {
+        "color": "red",
+        "plate": "ABC123",
+        "capacity": 2,
+        "vehicleType": "car"
+      }
+    }
+  }
+  ```
+
+- **401 Unauthorized**  
+  If the captain is not authenticated or token is invalid/missing.
+  ```json
+  {
+    "message": "Unauthorized"
+  }
+  ```
+
+---
+
+## 2. Captain Logout
+
+**Endpoint:** `GET /captain/logout`
+
+**Description:**  
+Logs out the captain by:
+
+- Clearing the authentication cookie
+- Blacklisting the current JWT token to prevent further use
+
+**Example Request:**
+
+```
+GET /captain/logout
+Cookie: token=your_jwt_token_here
+```
+
+**Responses:**
+
+- **200 OK**  
+  Indicates the captain has been logged out successfully.
+
+  ```json
+  {
+    "message": "Logged out succesfully"
+  }
+  ```
+
+- **401 Unauthorized**  
+  If the captain is not authenticated or token is invalid/missing.
+  ```json
+  {
+    "message": "Unauthorized"
+  }
+  ```
+
+---
+
+## Notes
+
+- Both endpoints are protected by the `CaptainAuth` middleware
+- The token can be provided either through cookies or the `Authorization` header
+- On logout, the token is:
+  1. Cleared from the cookies
+  2. Added to the blacklist collection to prevent reuse
+- The blacklist mechanism ensures that logged-out tokens cannot be used for authentication
