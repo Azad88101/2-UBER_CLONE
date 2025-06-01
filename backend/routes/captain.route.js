@@ -31,9 +31,6 @@ router.post(
       .isInt({ min: 1 })
       .withMessage("Capacity must be a number and at least 1"),
 
-    body("vehicle.vehicleType")
-      .isIn(["car", "bike", "auto"])
-      .withMessage("Vehicle type must be at least 3 characters long"),
   ],
   register
 );
