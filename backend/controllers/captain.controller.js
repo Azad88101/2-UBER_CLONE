@@ -2,25 +2,28 @@ const { validationResult } = require("express-validator");
 const Captain = require("../models/captain.model");
 const ApiError = require("../utils/ApiError");
 const Blacklist = require("../models/blacklist.model");
+
 const register = async (req, res) => {
   try {
     const { fullname, email, password, vehicle } = req.body;
 
     if (!fullname || !email || !password || !vehicle) {
-      throw new ApiError(409, "Required fields are missing");
+      throw new ApiError(409, "Required fields are missing", []);
     }
 
     const isAlreadyExist = await Captain.findOne({ email });
     if (isAlreadyExist) {
-      throw new ApiError(409, "Captain already exists");
+      throw new ApiError(409, "Captain already exists", []);
     }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: "error from froontend",
-        error: errors.array(),
-      });
+      // Throw ApiError with status 400, message, and errors array
+      throw new ApiError(
+        400,
+        "Validation errors from frontend",
+        errors.array()
+      );
     }
 
     const hashed = await Captain.hashPassword(password);
@@ -58,26 +61,26 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const err = validationResult(req);
-  if (!err.isEmpty) {
-    throw new ApiError(400, err);
+  if (!err.isEmpty()) {
+    throw new ApiError(400, "Validation errors from frontend", err.array());
   }
 
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new ApiError(409, "something is missing");
+    throw new ApiError(409, "Something is missing", []);
   }
 
   const captain = await Captain.findOne({ email }).select("+password");
 
   if (!captain) {
-    throw new ApiError(409, "user nor found");
+    throw new ApiError(409, "User not found" ,[]);
   }
 
   const isMatch = await captain.comparePassword(password);
 
   if (!isMatch) {
-    throw new ApiError(409, "email or password is wrong");
+    throw new ApiError(409, "Email or password is wrong",[]);
   }
 
   const token = await captain.generateToken();
@@ -85,7 +88,7 @@ const login = async (req, res) => {
 
   res.cookie("token", token);
   return res.status(200).json({
-    message: "user Logged In succesfully",
+    message: "User logged in successfully",
     data: {
       token,
       captain,
@@ -93,21 +96,27 @@ const login = async (req, res) => {
   });
 };
 
+// Get Captain Profile
 const getCaptainProfile = (req, res) => {
   return res.status(200).json({
     data: req.captain,
   });
 };
 
-const logout = async (req, res) => {
-  res.clearCookie("token");
-  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+// Logout Captain
+const logout = async (req, res, next) => {
+  try {
+    res.clearCookie("token");
 
-  const blacklist = await Blacklist.create({
-    token,
-  });
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+    if (token) {
+      await Blacklist.create({ token });
+    }
 
-  return res.status(200).json({ message: "Logged out succesfully" });
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = { register, login, getCaptainProfile, logout };
