@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-const UserHome = () => {
+const GetStart = () => {
   return (
     <div>
       <div className="bg-cover  bg-[url('https://images.unsplash.com/photo-1738251092609-d597545f2bb7?w=300&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8aW5kaWFuJTIwdHJhZmZpYyUyMGxpZ2h0fGVufDB8fDB8fHww')] h-screen w-full pt-5 flex justify-between flex-col bg-red-500">
@@ -13,10 +13,10 @@ const UserHome = () => {
         />
 
         <div className="bg-white py-3 px-3 ">
-          <h2 className="text-3xl font-bold">Get Started with Uber</h2>
+          <h2 className="text-4xl   font-bold">Get Started with Uber</h2>
 
           <Link to="/login">
-            <button className="w-full bg-black  text-white  py-3 rounded mt-5 ">
+            <button className="w-full bg-black rounded-lg  text-white  py-3  mt-5 ">
               Continue
             </button>
           </Link>
@@ -26,4 +26,4 @@ const UserHome = () => {
   );
 };
 
-export default UserHome;
+export default GetStart;

@@ -1,10 +1,73 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserDataContext } from "../Context/User_context";
+import axios from "axios";
 
 const User_Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userData, setuserData] = useState({})
+  const [Error, setError] = useState(null);
+
+  const [User, setUser] = useContext(UserDataContext);
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const userdata = {
+      email,
+      password,
+    };
+
+    try {
+      const url = import.meta.env.VITE_URL;
+      const res = await axios.post(`${url}/user/login`, userdata);
+      console.log(res);
+      if (res.status === 200) {
+        const data = res.data;
+        setUser(data.user);
+
+        localStorage.setItem("token", data.token);
+        navigate("/home");
+      }
+    } catch (err) {
+      if (err.response) {
+        // Server responded with a status other than 2xx
+        switch (err.response.status) {
+          case 400:
+            setError("Bad Request: Please check your input.");
+            break;
+          case 401:
+            setError("Unauthorized: Please log in first.");
+            break;
+          case 403:
+            setError("Forbidden: You don't have permission.");
+            break;
+          case 404:
+            setError("Endpoint not found.");
+            break;
+          case 409:
+            setError("User already exists with this email.");
+            break;
+          case 500:
+            setError("Server error. Please try again later.");
+            break;
+          default:
+            setError(
+              `Unexpected error (${err.response.status}). Please try again.`
+            );
+        }
+      } else if (err.request) {
+        // Request was made but no response received
+        setError("No response from server. Please check your network.");
+      } else {
+        // Something else went wrong
+        setError("An unexpected error occurred. Please try again.");
+      }
+    }
+
+    // console.log(userData)
+    setEmail("");
+    setPassword("");
+  };
 
   return (
     <div className="p-7 flex flex-col items-center justify-center">
@@ -14,17 +77,7 @@ const User_Login = () => {
           src="https://imgs.search.brave.com/VS7tj4eMRj3vJiO_AWHnw2NgXaMj916xmMK72FgQ3Xs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vUFNxY0dZ/MXFUZE9neFdjQ3NB/OTBqeE44YnZaZnln/SXdoXzNaV2xMRHRR/ay9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTlt/Y21WbC9iRzluYjNC/dVp5NWpiMjB2L2FX/MWhaMlZ6TDJGc2JG/OXAvYldjdk1UWTFP/VGMyTVRFdy9NSFZp/WlhJdGJHOW5ieTF3/L2JtY3VjRzVu"
           alt=""
         />
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setuserData({email,password})
-            // console.log(userData)
-            setEmail("");
-            setPassword("");
-          }}
-          className=" "
-          action=""
-        >
+        <form onSubmit={(e) => handleSubmit(e)} className=" " action="">
           <h3 className="text-xl font-medium mb-4">What's your email?</h3>
           <input
             name="email"
